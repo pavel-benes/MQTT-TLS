@@ -125,7 +125,7 @@ private:
     bool pingOutstanding;
     void (*callback)(void*,char*,uint8_t*,unsigned int);
     void* userData;
-    void (*qoscallback)(unsigned int);
+    void (*qoscallback)(void*,unsigned int);
     uint16_t readPacket(uint8_t*);
     int readByte();
     bool write(uint8_t header, uint8_t* buf, uint16_t length);
@@ -185,7 +185,7 @@ public:
     bool publish(const char *, const uint8_t *, unsigned int, bool);
     bool publish(const char *, const uint8_t *, unsigned int, bool, EMQTT_QOS, uint16_t *messageid = NULL);
     bool publish(const char *, const uint8_t *, unsigned int, bool, EMQTT_QOS, bool, uint16_t *messageid);
-    void addQosCallback(void (*qoscallback)(unsigned int));
+    void addQosCallback(void (*qoscallback)(void*,unsigned int));
     bool publishRelease(uint16_t messageid);
 
     bool subscribe(const char *);

@@ -55,7 +55,7 @@ void MQTT::initialize(char* domain, uint8_t *ip, uint16_t port, void (*callback)
 }
 
 
-void MQTT::addQosCallback(void (*qoscallback)(unsigned int)) {
+void MQTT::addQosCallback(void (*qoscallback)(void*,unsigned int)) {
     this->qoscallback = qoscallback;
 }
 
@@ -299,7 +299,7 @@ bool MQTT::loop() {
                         // msgId only present for QOS==0
                         if (len == 4 && (buffer[0]&0x06) == MQTTQOS0_HEADER_MASK) {
                             msgId = (buffer[2]<<8)+buffer[3];
-                            this->qoscallback(msgId);
+                            this->qoscallback(userData,msgId);
                         }
                     }
                 } else if (type == MQTTPUBCOMP) {
@@ -404,7 +404,6 @@ bool MQTT::publishRelease(uint16_t messageid) {
     }
     return false;
 }
-
 
 bool MQTT::write(uint8_t header, uint8_t* buf, uint16_t length) {
     uint8_t lenBuf[4];

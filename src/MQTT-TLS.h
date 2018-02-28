@@ -200,6 +200,14 @@ public:
     int enableTls(const char *rootCaPem, const size_t rootCaPemSize,
                   const char *clientCertPem, const size_t clientCertPemSize,
                   const char *clientKeyPem, const size_t clientKeyPemSize);
+
+    //HINT Due to some bug, the class does not initialize correctly its members (or its menbers' members) and
+    // sometimes fails or even crashes.
+    void* operator new(size_t size) {
+        void *p = malloc(size);
+        memset(p, 0, size);
+        return p;
+    }
 };
 
 #endif

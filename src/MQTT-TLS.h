@@ -116,7 +116,43 @@ typedef enum{
 }MQTT_VERSION;
 
 private:
-    TCPClient tcpClient;
+    class TCPClientWithStats : public TCPClient {
+        friend class MQTT;
+        uint32_t bytesWritten = 0;
+        uint32_t bytesRead = 0;
+
+    public:
+        virtual size_t write(uint8_t value) {
+            int n = TCPClient::write(value);
+            if (n > 0) {
+                bytesWritten+=n;
+            }
+            return n;
+        }
+        virtual size_t write(const uint8_t *buffer, size_t size) {
+            int n = TCPClient::write(buffer, size);
+            if (n > 0) {
+                bytesWritten+=n;
+            }
+            return n;
+        }
+        virtual int read() {
+            int c = TCPClient::read();
+            if ( c > -1) {
+                bytesRead++;
+            }
+            return c;
+        }
+        virtual int read(uint8_t *buffer, size_t size) {
+            int n = TCPClient::read(buffer, size);
+            if ( n > 0) {
+                bytesRead+=n;
+            }
+            return n;
+        }
+    };
+
+    TCPClientWithStats tcpClient;
 
     uint8_t *buffer;
     uint16_t nextMsgId;
@@ -193,6 +229,10 @@ public:
     bool unsubscribe(const char *);
     bool loop();
     bool isConnected();
+
+    uint32_t getBytesWritten() { return tcpClient.bytesWritten; }
+    uint32_t getBytesRead() { return tcpClient.bytesRead; }
+    void resetStatistics() { tcpClient.bytesWritten = tcpClient.bytesRead = 0; }
 
     /* TLS */
     bool verify();
